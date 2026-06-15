@@ -18,7 +18,7 @@ struct Ponto{
 // struct Reta representa uma linha entre dois vértices, contendo os vértices e um estado de seleção
 struct Reta{
     Vertice v1, v2;
-    bool selecionada = false;
+    bool selecionado = false;
 };
 
 // struct Poligono representa um polígono definido por uma lista de vértices, contendo os vértices e um estado de seleção

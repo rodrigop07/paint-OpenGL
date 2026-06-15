@@ -1,7 +1,7 @@
 # 1. Configurações do Compilador e Flags básicas
 CXX = g++
 CXXFLAGS = -O3 -Wall -std=c++17
-TARGET = main.exe
+TARGET = main
 
 # 2. Listagem de arquivos de código
 SRCS = src/main.cpp src/eventos.cpp
@@ -11,7 +11,7 @@ OBJS = $(SRCS:.cpp=.o)
 # Define as flags de renderização e janelas baseado no OS atual
 ifeq ($(OS), Windows_NT)
     # Windows (Usando MinGW / MSYS2)
-    LIBS = -lglew32 -lglfw3 -lopengl32 -lgdi32
+    LIBS = -lfreeglut -lglu32 -lopengl32 -lgdi32
     RM = del /Q /F
     TARGET := $(TARGET).exe
 else
