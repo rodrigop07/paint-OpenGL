@@ -4,7 +4,7 @@ CXXFLAGS = -O3 -Wall -std=c++17
 TARGET = main.exe
 
 # 2. Listagem de arquivos de código
-SRCS = main.cpp
+SRCS = src/main.cpp src/eventos.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # 3. DETECÇÃO AUTOMÁTICA DE SISTEMA OPERACIONAL

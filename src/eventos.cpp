@@ -1,43 +1,12 @@
-#include <iostream>
+
+#include "../headers/eventos.h"
 #include <GL/glut.h>
-#include <vector>
+#include <iostream>
 
-// definição dos structs para a criação dos objetos geométricos
-// struct Vertice representa um ponto no espaço 2D
-struct Vertice{
-    float x, y;
-};
-
-// struct Ponto representa um ponto selecionável, contendo um vértice e um estado de seleção
-struct Ponto{
-    Vertice v;
-    bool selecionado = false;
-};
-
-// struct Reta representa uma linha entre dois vértices, contendo os vértices e um estado de seleção
-struct Reta{
-    Vertice v1, v2;
-    bool selecionada = false;
-};
-
-// struct Poligono representa um polígono definido por uma lista de vértices, contendo os vértices e um estado de seleção
-struct Poligono{
-    std::vector<Vertice> vertices;
-    bool selecionado = false;
-};
-
-enum ModoDesenho{
-    SELECAO,
-    PONTO,
-    RETA,
-    POLIGONO
-};
-
+// definição das variáveis globais
 ModoDesenho modoAtual = SELECAO;
-
-int larguraJanela = 800;
-int alturaJanela = 600;
-
+int larguraJanela = 1280;
+int alturaJanela = 720;
 
 // lista para armazenar os pontos criados
 std::vector<Ponto> listaPontos;
@@ -47,10 +16,15 @@ std::vector<Reta> listaRetas;
 std::vector<Poligono> listaPoligonos;
 
 // variáveis temporárias para o desenho de retas e polígonos
+// quantos vértices da reta foram inseridos
 int pontosReta = 0;
+// primeiro vértice da reta
 Vertice cacheV1;
+// lista de vértices temporária para o polígono
 std::vector<Vertice> verticesPoligono;
 
+
+// função para desenhar todos os objetos atuais na tela
 void display(){
     // limpa o buffer de cor da tela
     glClear(GL_COLOR_BUFFER_BIT);
@@ -85,10 +59,10 @@ void display(){
     }
 
     // executa todos os comandos de desenho pendentes
-    glFlush();
-    
+    glFlush();  
 }
 
+// função para gerenciar os eventos do mouse
 void handleMouse(int button, int state, int x, int y){
     // verifica se o botão esquerdo do mouse foi pressionado
     if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
@@ -153,6 +127,7 @@ void handleMouse(int button, int state, int x, int y){
     }
 }
 
+// função para gerenciar os eventos do teclado
 void handleKeyboard(unsigned char key, int x, int y){
     // usa as teclas para alternar entre os modos de desenho
     if (key == 'q' || key == 'Q'){
@@ -164,45 +139,8 @@ void handleKeyboard(unsigned char key, int x, int y){
     }else if(key == 'e' || key == 'E'){
         modoAtual = POLIGONO;
         std::cout << "Modo POLIGONO ativado" << std::endl;
+    }else if(key == 's' || key == 'S'){
+        modoAtual = SELECAO;
+        std::cout << "Modo SELECAO ativado" << std::endl;
     }
 }
-
-
-void init(int argc, char** argv, int largura, int altura){
-    // carrega as bibliotecas do GLUT
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-
-    // tamanho da janela
-    glutInitWindowSize(largura, altura);
-    //posição inicial da janela
-    glutInitWindowPosition(100, 100);
-    // título da janela
-    glutCreateWindow("Paint 1.0");
-
-    // inicia modo de matriz de projeção
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    // configura uma projeção ortográfica 2d
-    gluOrtho2D(0.0, largura, 0.0, altura);
-
-    // função que será chamada sempre que a janela precisar ser redesenhada
-    glutDisplayFunc(display);
-    glutMouseFunc(handleMouse);
-    glutKeyboardFunc(handleKeyboard);
-
-
-    // deixa a janela aberta esperando eventos
-    glutMainLoop();
-};
-
-
-int main(int argc, char** argv){
-    init(argc, argv, larguraJanela, alturaJanela);
-
-
-    return 0;
-}
-
-
-
