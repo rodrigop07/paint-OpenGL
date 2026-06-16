@@ -11,7 +11,7 @@ void init(int argc, char** argv, int largura, int altura){
     //posição inicial da janela
     glutInitWindowPosition(100, 100);
     // título da janela
-    glutCreateWindow("Paint 1.0");
+    glutCreateWindow("Paint 2.0");
 
     // inicia modo de matriz de projeção
     glMatrixMode(GL_PROJECTION);

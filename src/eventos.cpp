@@ -6,8 +6,8 @@
 
 // definição das variáveis globais
 ModoDesenho modoAtual = SELECAO;
-int larguraJanela = 1280;
-int alturaJanela = 720;
+int larguraJanela = 800;
+int alturaJanela = 600;
 
 // lista para armazenar os pontos criados
 std::vector<Ponto> listaPontos;
@@ -196,6 +196,172 @@ void rotacionarObjetos(float anguloG){
     }
 }
 
+void transladarObjetos(float dx, float dy){
+    // aplica translação nos pontos
+    for(auto &p: listaPontos){
+        if(p.selecionado){
+            p.v.x += dx;
+            p.v.y += dy;
+        }
+    }
+
+    // aplica translação nas retas
+    for(auto &r: listaRetas){
+        if(r.selecionado){
+            r.v1.x += dx;
+            r.v1.y += dy;
+            r.v2.x += dx;
+            r.v2.y += dy;
+        }
+    }
+
+    // aplica translação nos polígonos
+    for(auto &p: listaPoligonos){
+        if(p.selecionado){
+            for(auto &v: p.vertices){
+                v.x += dx;
+                v.y += dy;
+            }
+        }
+    }
+}
+
+// função para aumentar/diminuir a escala de objetos
+void escalarObjetos(float fator){
+    // aplica transformação nas retas
+    for(auto &r: listaRetas){
+        if(r.selecionado){
+            // calcula o centro da reta
+            float cx = (r.v1.x + r.v2.x) / 2.0f;
+            float cy = (r.v1.y + r.v2.y) / 2.0f;
+
+            // aplica translação + escalonamento + translação inversa no vértice 1
+            r.v1.x = (r.v1.x - cx) * fator + cx;
+            r.v1.y = (r.v1.y - cy) * fator + cy;
+
+            // aplica translação + escalonamento + translação inversa no vértice 2
+            r.v2.x = (r.v2.x - cx) * fator + cx;
+            r.v2.y = (r.v2.y - cy) * fator + cy;
+        }
+    }
+
+    // aplica a transformação nos polígonos
+    for(auto &p: listaPoligonos){
+        if(p.selecionado && !p.vertices.empty()){
+            // calcula o centro do polígono
+            float cx = 0;
+            float cy = 0;
+            for(const auto &v: p.vertices){
+                cx += v.x;
+                cy += v.y;
+            }
+            cx /= p.vertices.size();
+            cy /= p.vertices.size();
+
+            // aplica translação + escalonamento + translação inversa em cada vértice do polígono
+            for(auto &v: p.vertices){
+                v.x = (v.x - cx) * fator + cx;
+                v.y = (v.y - cy) * fator + cy;
+            }
+        }
+    }
+}
+
+// função para refletir objetos em relação ao seu centro
+void refletirObjetos(bool horizontal, bool vertical){
+    // reflete as retas selecionadas
+    for(auto &r: listaRetas){
+        if(r.selecionado){
+            // calcula o centro da reta
+            float cx = (r.v1.x + r.v2.x) / 2.0f;
+            float cy = (r.v1.y + r.v2.y) / 2.0f;
+
+            // verifica o sentido e aplica a reflexão
+            if(horizontal){
+                r.v1.x = (r.v1.x - cx) * -1.0f + cx;
+                r.v2.x = (r.v2.x - cx) * -1.0f + cx;
+            }
+            if(vertical){
+                r.v1.y = (r.v1.y - cy) * -1.0f + cy;
+                r.v2.y = (r.v2.y - cy) * -1.0f + cy;
+            }
+        }
+    }
+
+    // reflete os polígonos selecionados
+    for(auto &p: listaPoligonos){
+        if(p.selecionado && !p.vertices.empty()){
+            float cx = 0;
+            float cy = 0;
+            for(const auto &v: p.vertices){
+                cx += v.x;
+                cy += v.y;
+            }
+            cx /= p.vertices.size();
+            cy /= p.vertices.size();
+
+            // aplica translação + reflexão + translação inversa em cada vértice do polígono
+            for(auto &v: p.vertices){
+                float xAnterior = v.x;
+                float yAnterior = v.y;
+                if(horizontal){
+                    v.x = (xAnterior - cx) * -1.0f + cx;
+                }
+                if(vertical){
+                    v.y = (yAnterior - cy) * -1.0f + cy;
+                }
+            }
+        }
+    }
+}
+
+
+void cisalharObjetos(float ciX, float ciY){
+    for(auto &r: listaRetas){
+        if(r.selecionado){
+            float cx = (r.v1.x + r.v2.x) / 2.0f;
+            float cy = (r.v1.y + r.v2.y) / 2.0f;
+            
+            float x1 = r.v1.x;
+            float y1 = r.v1.y;
+            r.v1.x = (x1 - cx) + ciX * (y1 - cy) + cx;
+            r.v1.y = (y1 - cy) + ciY * (x1 - cx) + cy;
+            //r.v1.x = x1 + ciX * (y1 - cy);
+            //r.v1.y = y1 + ciY * (x1 - cx);
+
+            float x2 = r.v2.x;
+            float y2 = r.v2.y;
+            r.v2.x = (x2 - cx) + ciX * (y2 - cy) + cx;
+            r.v2.y = (y2 - cy) + ciY * (x2 - cx) + cy;
+            //r.v2.x = x2 + ciX * (y2 - cy);
+            //r.v2.y = y2 + ciY * (x2 - cx);
+        }
+    }
+
+    // aplica cisalhamento nos polígonos
+    for(auto &p: listaPoligonos){
+        if(p.selecionado && !p.vertices.empty()){
+            float cx = 0;
+            float cy = 0;
+            for(const auto &v: p.vertices){
+                cx += v.x;
+                cy += v.y;
+            }
+            cx /= p.vertices.size();
+            cy /= p.vertices.size();
+
+            // aplica translação + cisalhamento + translação inversa em cada vértice do polígono
+            for(auto &v: p.vertices){
+                float x1 = v.x;
+                float y1 = v.y;
+                v.x = (x1 - cx) + ciX * (y1 - cy) + cx;
+                v.y = (y1 - cy) + ciY * (x1 - cx) + cy;
+                //v.x = x1 + ciX * (y1 - cy);
+                //v.y = y1 + ciY * (x1 - cx);
+            }
+        }
+    }
+}
 
 // função para desenhar todos os objetos atuais na tela
 void display(){
@@ -308,6 +474,7 @@ void handleMouse(int button, int state, int x, int y){
 
 // função para gerenciar os eventos do teclado
 void handleKeyboard(unsigned char key, int x, int y){
+    int modificador = glutGetModifiers();
     // usa as teclas para alternar entre os modos de desenho
     // troca para o modo ponto
     if (key == 'v' || key == 'V'){
@@ -331,6 +498,26 @@ void handleKeyboard(unsigned char key, int x, int y){
         excluirObjetos();
         glutPostRedisplay();
     }
+
+    if(modificador == GLUT_ACTIVE_SHIFT){
+        if(key == 'a' || key == 'A'){
+            cisalharObjetos(-0.1f, 0.0f);
+            std::cout << "SHIFT + a pressionado, cisalhando objetos negativamente em x" << std::endl;
+            glutPostRedisplay();
+        }else if(key == 's' || key == 'S'){
+            cisalharObjetos(0.1f, 0.0f);
+            std::cout << "SHIFT + s pressionado, cisalhando objetos positivamente em x" << std::endl;
+            glutPostRedisplay();
+        }else if(key == 'z' || key == 'Z'){
+            cisalharObjetos(0.0f, -0.1f);
+            std::cout << "SHIFT + z pressionado, cisalhando objetos negativamente em y" << std::endl;
+            glutPostRedisplay();
+        }else if(key == 'x' || key == 'X'){
+            cisalharObjetos(0.0f, 0.1f);
+            std::cout << "SHIFT + x pressionado, cisalhando objetos positivamente em y" << std::endl;
+            glutPostRedisplay();
+        }
+    }
 }
 
 // função para gerenciar o movimento ativo do mouse
@@ -344,31 +531,10 @@ void handleMotion(int x, int y){
     float dX = x - arrastoX;
     float dY = yCorrigido - arrastoY;
 
-    for(auto &p: listaPontos){
-        if(p.selecionado){
-            p.v.x += dX;
-            p.v.y += dY;
-        }
-    }
+    // aplica translação nos objetos selecionados
+    transladarObjetos(dX, dY);
 
-    for(auto &r: listaRetas){
-        if(r.selecionado){
-            r.v1.x += dX;
-            r.v1.y += dY;
-            r.v2.x += dX;
-            r.v2.y += dY;
-        }
-    }
-
-    for(auto &p: listaPoligonos){
-        if(p.selecionado){
-            for(auto &v: p.vertices){
-                v.x += dX;
-                v.y += dY;
-            }
-        }
-    }
-
+    // atualiza a posição anterior do mouse
     arrastoX = x;
     arrastoY = yCorrigido;
     glutPostRedisplay();
@@ -377,19 +543,80 @@ void handleMotion(int x, int y){
 // função para gerenciar eventos especiais do teclado, como teclas fora do padrão ASCII
 void handleSpecialKeyboard(int key, int x, int y){
     if(modoAtual == SELECAO){
+        // define o valor de translação a cada movimento
+        float tPasso = 5.0f;
         // define o ângulo de rotação a cada movimento
         float rPasso = 5.0f;
+        // define o fator de encolhimento a cada clique 
+        float fatorEncolhimento = 0.9f;
+        // define o fator de crescimento a cada clique
+        float fatorCrescimento = 1.1f;
+
+        // verifica se alguma tecla modificadora (shift, ctrl, alt) foi pressionada
+        int modificador = glutGetModifiers();
 
         switch(key){
             case GLUT_KEY_LEFT:
-                rotacionarObjetos(rPasso);
-                std::cout << "Seta esquerda pressionada, rotacionando objetos em 5 graus" << std::endl;
-                glutPostRedisplay();
+                if(modificador == GLUT_ACTIVE_CTRL){
+                    transladarObjetos(-tPasso, 0);
+                    std::cout << "CTRL + Seta esquerda pressionada, transladando objetos" << std::endl;
+                    glutPostRedisplay();
+                }else if(modificador == GLUT_ACTIVE_SHIFT){
+                    rotacionarObjetos(rPasso);
+                    std::cout << "SHIFT + Seta esquerda pressionada, rotacionando objetos 5 graus para a esquerda" << std::endl;
+                    glutPostRedisplay();
+                }else if(modificador == GLUT_ACTIVE_ALT){
+                    refletirObjetos(true, false);
+                    std::cout << "ALT + Seta esquerda pressionada, refletindo objetos horizontalmente" << std::endl;
+                    glutPostRedisplay();
+                }
+                break;
+            case GLUT_KEY_UP:
+                if(modificador == GLUT_ACTIVE_CTRL){
+                    transladarObjetos(0, tPasso);
+                    std::cout << "CTRL + Seta para cima pressionada, transladando objetos" << std::endl;
+                    glutPostRedisplay();
+                }else if(modificador == GLUT_ACTIVE_SHIFT){
+                    escalarObjetos(fatorCrescimento);
+                    std::cout << "SHIFT + Seta para cima pressionada, escalando objetos em 10%" << std::endl;
+                    glutPostRedisplay();
+                }else if(modificador == GLUT_ACTIVE_ALT){
+                    refletirObjetos(false, true);
+                    std::cout << "ALT + Seta para cima pressionada, refletindo objetos verticalmente" << std::endl;
+                    glutPostRedisplay();
+                }
+                break;
+            case GLUT_KEY_DOWN:
+                if(modificador == GLUT_ACTIVE_CTRL){
+                    transladarObjetos(0, -tPasso);
+                    std::cout << "CTRL + Seta para baixo pressionada, transladando objetos" << std::endl;
+                    glutPostRedisplay();
+                }else if(modificador == GLUT_ACTIVE_SHIFT){
+                    escalarObjetos(fatorEncolhimento);
+                    std::cout << "SHIFT + Seta para baixo pressionada, encolhendo objetos em 10%" << std::endl;
+                    glutPostRedisplay();
+                }else if(modificador == GLUT_ACTIVE_ALT){
+                    refletirObjetos(false, true);
+                    std::cout << "ALT + Seta para baixo pressionada, refletindo objetos verticalmente" << std::endl;
+                    glutPostRedisplay();
+                }
                 break;
             case GLUT_KEY_RIGHT:
-                rotacionarObjetos(-rPasso);
-                std::cout << "Seta direita pressionada, rotacionando objetos em -5 graus" << std::endl;
-                glutPostRedisplay();
+                if(modificador == GLUT_ACTIVE_CTRL){
+                    transladarObjetos(tPasso, 0);
+                    std::cout << "CTRL + Seta direita pressionada, transladando objetos" << std::endl;
+                    glutPostRedisplay();
+                }else if(modificador == GLUT_ACTIVE_SHIFT){
+                    rotacionarObjetos(-rPasso);
+                    std::cout << "SHIFT + Seta direita pressionada, rotacionando objetos 5 graus para a direita" << std::endl;
+                    glutPostRedisplay();
+                }else if(modificador == GLUT_ACTIVE_ALT){
+                    refletirObjetos(true, false);
+                    std::cout << "ALT + Seta direita pressionada, refletindo objetos horizontalmente" << std::endl;
+                    glutPostRedisplay();
+                }
+                break;
+            default:
                 break;
         }
     }

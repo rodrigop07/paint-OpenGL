@@ -1,7 +1,7 @@
 # 1. Configurações do Compilador e Flags básicas
 CXX = g++
 CXXFLAGS = -O3 -Wall -std=c++17
-TARGET = main
+TARGET = app
 
 # 2. Listagem de arquivos de código
 SRCS = src/main.cpp src/eventos.cpp
