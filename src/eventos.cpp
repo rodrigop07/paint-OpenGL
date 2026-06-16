@@ -2,6 +2,7 @@
 #include <GL/glut.h>
 #include <iostream>
 #include <cmath>
+#include <numbers>
 
 // definição das variáveis globais
 ModoDesenho modoAtual = SELECAO;
@@ -22,6 +23,10 @@ int pontosReta = 0;
 Vertice cacheV1;
 // lista de vértices temporária para o polígono
 std::vector<Vertice> verticesPoligono;
+
+// variáveis para rastrear o arrasto de objetos
+int arrastoX = 0;
+int arrastoY = 0;
 
 
 // calcula a distância euclidiana entre dois vértices
@@ -94,7 +99,8 @@ void tentarSelecionar(int x, int y){
     }
 }
 
-void excluiObjetosSelecionados(){
+// função para excluir objetos selecionados
+void excluirObjetos(){
     // percorre a lista de pontos
     for(auto it = listaPontos.begin(); it != listaPontos.end();){
         if(it->selecionado){
@@ -122,6 +128,70 @@ void excluiObjetosSelecionados(){
             std::cout << "Poligono excluido" << std::endl;
         }else{
             ++it;
+        }
+    }
+}
+
+// função para rotacionar objetos
+void rotacionarObjetos(float anguloG){
+    // converte o ângulo de graus para radianos
+    float anguloR = anguloG * (3.14159265f / 180.0f);
+    // calcula seno e cosseno do ângulo
+    float cosA = std::cos(anguloR);
+    float senA = std::sin(anguloR);
+
+    // aplica a rotação dos pontos em torno da origem
+    for(auto &p: listaPontos){
+        if(p.selecionado){
+            float xAnterior = p.v.x;
+            float yAnterior = p.v.y;
+            // aplica a fórmula de rotação
+            p.v.x = xAnterior * cosA - yAnterior * senA;
+            p.v.y = xAnterior * senA + yAnterior * cosA;
+        }
+    }
+
+    // aplica rotação nas retas
+    for(auto &r: listaRetas){
+        if(r.selecionado){
+            // calcula o centro da reta
+            float cx = (r.v1.x + r.v2.x) / 2.0f;
+            float cy = (r.v1.y + r.v2.y) / 2.0f;
+
+            // aplica translação + rotação + translação inversa no vértice 1
+            float x1 = r.v1.x;
+            float y1 = r.v1.y;
+            r.v1.x = (x1 - cx) * cosA - (y1 - cy) * senA + cx;
+            r.v1.y = (x1 - cx) * senA + (y1 - cy) * cosA + cy;
+            
+            // aplica translação + rotação + translação inversa no vértice 2
+            float x2 = r.v2.x;
+            float y2 = r.v2.y;
+            r.v2.x = (x2 - cx) * cosA - (y2 - cy) * senA + cx;
+            r.v2.y = (x2 - cx) * senA + (y2 - cy) * cosA + cy;
+        }
+    }
+
+    // aplica rotação nos polígonos
+    for(auto &p: listaPoligonos){
+        if(p.selecionado && !p.vertices.empty()){
+            // calcula o centro do polígono
+            float cx = 0, cy = 0;
+            for(const auto &v: p.vertices){
+                cx += v.x;
+                cy += v.y;
+            }
+            
+            cx /= p.vertices.size();
+            cy /= p.vertices.size();
+
+            // aplica translação + rotação + translação inversa em cada vértice do polígono
+            for(auto &v: p.vertices){
+                float xAnterior = v.x;
+                float yAnterior = v.y;
+                v.x = (xAnterior - cx) * cosA - (yAnterior - cy) * senA + cx;
+                v.y = (xAnterior - cx) * senA + (yAnterior - cy) * cosA + cy;
+            }
         }
     }
 }
@@ -174,6 +244,9 @@ void handleMouse(int button, int state, int x, int y){
         // verifica o modo atual e 
         if(modoAtual == SELECAO){
             tentarSelecionar(x, yCorrigido);
+            arrastoX = x;
+            arrastoY = yCorrigido;
+            // atualiza a tela
             glutPostRedisplay();
         }else if(modoAtual == PONTO){
             // cria um novo e pega as coordenadas do clique do mouse
@@ -182,8 +255,8 @@ void handleMouse(int button, int state, int x, int y){
             novoPonto.v.y = yCorrigido;
             // adiciona o novo ponto à lista
             listaPontos.push_back(novoPonto);
-            // redesenha a tela
             std::cout << "Ponto criado em (" << x << ", " << yCorrigido << ")" << std::endl;
+            // redesenha a tela
             glutPostRedisplay();
         }else if(modoAtual == RETA){
             // primeiro vértice da reta, guarda o ponto em uma variável temporária
@@ -255,7 +328,69 @@ void handleKeyboard(unsigned char key, int x, int y){
     }
     // exclui os objetos selecionados se estiver no modo seleção
     if(modoAtual == SELECAO && (key == 'd' || key == 'D')){
-        excluiObjetosSelecionados();
+        excluirObjetos();
         glutPostRedisplay();
+    }
+}
+
+// função para gerenciar o movimento ativo do mouse
+void handleMotion(int x, int y){
+    if(modoAtual != SELECAO)
+        return;
+
+    int yCorrigido = alturaJanela - y;
+
+    // calcula a distância que o mouse se moveu em relação à posição anterior
+    float dX = x - arrastoX;
+    float dY = yCorrigido - arrastoY;
+
+    for(auto &p: listaPontos){
+        if(p.selecionado){
+            p.v.x += dX;
+            p.v.y += dY;
+        }
+    }
+
+    for(auto &r: listaRetas){
+        if(r.selecionado){
+            r.v1.x += dX;
+            r.v1.y += dY;
+            r.v2.x += dX;
+            r.v2.y += dY;
+        }
+    }
+
+    for(auto &p: listaPoligonos){
+        if(p.selecionado){
+            for(auto &v: p.vertices){
+                v.x += dX;
+                v.y += dY;
+            }
+        }
+    }
+
+    arrastoX = x;
+    arrastoY = yCorrigido;
+    glutPostRedisplay();
+}
+
+// função para gerenciar eventos especiais do teclado, como teclas fora do padrão ASCII
+void handleSpecialKeyboard(int key, int x, int y){
+    if(modoAtual == SELECAO){
+        // define o ângulo de rotação a cada movimento
+        float rPasso = 5.0f;
+
+        switch(key){
+            case GLUT_KEY_LEFT:
+                rotacionarObjetos(rPasso);
+                std::cout << "Seta esquerda pressionada, rotacionando objetos em 5 graus" << std::endl;
+                glutPostRedisplay();
+                break;
+            case GLUT_KEY_RIGHT:
+                rotacionarObjetos(-rPasso);
+                std::cout << "Seta direita pressionada, rotacionando objetos em -5 graus" << std::endl;
+                glutPostRedisplay();
+                break;
+        }
     }
 }

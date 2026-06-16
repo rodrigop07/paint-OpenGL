@@ -21,8 +21,14 @@ void init(int argc, char** argv, int largura, int altura){
 
     // função que será chamada sempre que a janela precisar ser redesenhada
     glutDisplayFunc(display);
+    // função para eventos do mouse
     glutMouseFunc(handleMouse);
+    // função para eventos do teclado
     glutKeyboardFunc(handleKeyboard);
+    // função para eventos de movimento do mouse
+    glutMotionFunc(handleMotion);
+    // função para eventos de teclado especial
+    glutSpecialFunc(handleSpecialKeyboard);
 
     // deixa a janela aberta esperando eventos
     glutMainLoop();

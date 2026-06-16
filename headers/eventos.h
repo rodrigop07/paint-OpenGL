@@ -12,6 +12,9 @@ extern std::vector<Ponto> listaPontos;
 extern std::vector<Reta> listaRetas;
 extern std::vector<Poligono> listaPoligonos;
 
+extern int arrastoX;
+extern int arrastoY;
+
 extern int pontosReta;
 extern Vertice cacheV1;
 extern std::vector<Vertice> verticesPoligono;
@@ -20,5 +23,7 @@ extern std::vector<Vertice> verticesPoligono;
 void display();
 void handleMouse(int button, int state, int x, int y);
 void handleKeyboard(unsigned char key, int x, int y);
+void handleMotion(int x, int y);
+void handleSpecialKeyboard(int key, int x, int y);
 
 #endif // EVENTOS_H
