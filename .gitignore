@@ -2,6 +2,9 @@
 app
 main
 
+# Output do progresso do Paint
+progresso.txt
+
 # Prerequisites
 *.d
 

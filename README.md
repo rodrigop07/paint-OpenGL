@@ -27,9 +27,11 @@ Aperte `Ctrl` + `<-` para mover objetos selecionados para a esquerda
 Aperte `Ctrl` + `->` para mover objetos selecionados para a direita  
 Aperte `Ctrl` + `^` para mover objetos selecionados para cima  
 Aperte `Ctrl` + `v` para mover objetos selecionados para baixo  
-Aperte `Alt` + `<-` ou `Alt` + `->` para espelhar objetos selecionados no eixo vertical
-Aperte `Alt` + `^` ou `Alt` + `v` para espelhar objetos selecionados no eixo horizontal
+Aperte `Alt` + `<-` ou `Alt` + `->` para espelhar objetos selecionados no eixo vertical  
+Aperte `Alt` + `^` ou `Alt` + `v` para espelhar objetos selecionados no eixo horizontal  
 Aperte `Shift` + `a` para cisalhar objetos selecionados na direção x negativamente  
 Aperte `Shift` + `s` para cisalhar objetos selecionados na direção x positivamente  
 Aperte `Shift` + `z` para cisalhar objetos selecionados na direção y negativamente  
-Aperte `Shift` + `x` para cisalhar objetos selecionados na direção y positivamente
+Aperte `Shift` + `x` para cisalhar objetos selecionados na direção y positivamente  
+Aperte `Ctrl` `s` para salvar o progresso  
+Aperte `Ctrl` `o` para carregar o progresso  

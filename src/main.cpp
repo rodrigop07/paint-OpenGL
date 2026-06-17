@@ -1,5 +1,7 @@
-#include <GL/glut.h>
+#include "../headers/global.h"
 #include "../headers/eventos.h"
+//#include "../headers/transformacoes.h"
+#include <GL/glut.h>
 
 void init(int argc, char** argv, int largura, int altura){
     // carrega as bibliotecas do GLUT

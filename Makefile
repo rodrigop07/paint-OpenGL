@@ -4,7 +4,7 @@ CXXFLAGS = -O3 -Wall -std=c++17
 TARGET = app
 
 # 2. Listagem de arquivos de código
-SRCS = src/main.cpp src/eventos.cpp
+SRCS = src/main.cpp src/eventos.cpp src/global.c src/transformacoes.c
 OBJS = $(SRCS:.cpp=.o)
 
 # 3. DETECÇÃO AUTOMÁTICA DE SISTEMA OPERACIONAL
