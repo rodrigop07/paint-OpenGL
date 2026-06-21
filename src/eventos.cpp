@@ -1,7 +1,7 @@
-#include "../headers/Eventos.h"
+#include "../headers/eventos.h"
 #include "../headers/Globais.h"
-#include "../headers/Geometria.h"
-#include "../headers/Transformacoes.h"
+#include "../headers/geometria.h"
+#include "../headers/transformacoes.h"
 #include <GL/glut.h>
 #include <iostream>
 #include <cmath>
@@ -68,6 +68,7 @@ void abrirArquivo(){
     for(int i = 0; i < qtd; i++){
         Ponto novoPonto;
         arquivo >> novoPonto.v.x >> novoPonto.v.y;
+        novoPonto.selecionado = false;
         listaPontos.push_back(novoPonto);
     }
 
@@ -76,6 +77,7 @@ void abrirArquivo(){
     for(int i = 0; i < qtd; i++){
         Reta novaReta;
         arquivo >> novaReta.v1.x >> novaReta.v1.y >> novaReta.v2.x >> novaReta.v2.y;
+        novaReta.selecionado = false;
         listaRetas.push_back(novaReta);
     }
 
@@ -83,6 +85,7 @@ void abrirArquivo(){
     arquivo >> qtd;
     for(int i = 0; i < qtd; i++){
         Poligono novoPoligono;
+        novoPoligono.selecionado = false;
         int qtdVertices;
         arquivo >> qtdVertices;
 
@@ -156,6 +159,7 @@ void handleMouse(int button, int state, int x, int y){
             Ponto novoPonto;
             novoPonto.v.x = x;
             novoPonto.v.y = yCorrigido;
+            novoPonto.selecionado = false; 
             // adiciona o novo ponto à lista
             listaPontos.push_back(novoPonto);
             std::cout << "Ponto criado em (" << x << ", " << yCorrigido << ")" << std::endl;
@@ -175,6 +179,7 @@ void handleMouse(int button, int state, int x, int y){
                 novaReta.v1 = cacheV1;
                 novaReta.v2.x = x;
                 novaReta.v2.y = yCorrigido;
+                novaReta.selecionado = false;
                 // adiciona a reta à lista
                 listaRetas.push_back(novaReta);
                 std::cout << "Segundo vertice da reta definido em (" << x << ", " << yCorrigido << ")" << std::endl;
@@ -197,6 +202,7 @@ void handleMouse(int button, int state, int x, int y){
         // fecha o polígono e adiciona na lista de polígonos
         if(modoAtual == POLIGONO){
             Poligono novoPoligono;
+            novoPoligono.selecionado = false;
             // recebe a lista de vértices temporária
             novoPoligono.vertices = verticesPoligono;
             // adiciona o polígono à lista de polígonos
@@ -219,7 +225,8 @@ void handleKeyboard(unsigned char key, int x, int y){
         glutPostRedisplay();
     }
 
-    if(modificador == GLUT_ACTIVE_SHIFT){
+    // ALTERAÇÃO: Trocado '==' por '&'
+    if(modificador & GLUT_ACTIVE_SHIFT){
         if(key == 'A'){
             cisalharObjetos(-0.1f, 0.0f);
             std::cout << "SHIFT + a pressionado, cisalhando objetos negativamente em x" << std::endl;
@@ -237,7 +244,8 @@ void handleKeyboard(unsigned char key, int x, int y){
             std::cout << "SHIFT + x pressionado, cisalhando objetos positivamente em y" << std::endl;
             glutPostRedisplay();
         }
-    }else if(modificador == GLUT_ACTIVE_CTRL){
+    // ALTERAÇÃO: Trocado '==' por '&'
+    }else if(modificador & GLUT_ACTIVE_CTRL){
         // 19 corresponde a tecla 'S' quando ctrl está pressionado
         if(key == 19){
             salvarArquivo();
@@ -274,7 +282,6 @@ void handleKeyboard(unsigned char key, int x, int y){
             modoAtual = SELECAO;
             std::cout << "Modo SELECAO ativado" << std::endl;
         }
-
     }
 }
 
@@ -300,6 +307,7 @@ void handleMotion(int x, int y){
 
 // função para gerenciar eventos especiais do teclado, como teclas fora do padrão ASCII
 void handleSpecialKeyboard(int key, int x, int y){
+
     if(modoAtual == SELECAO){
         // define o valor de translação a cada movimento
         float tPasso = 5.0f;
@@ -312,63 +320,68 @@ void handleSpecialKeyboard(int key, int x, int y){
 
         // verifica se alguma tecla modificadora (shift, ctrl, alt) foi pressionada
         int modificador = glutGetModifiers();
-
+        
         switch(key){
+
             case GLUT_KEY_LEFT:
-                if(modificador == GLUT_ACTIVE_CTRL){
+          
+                if(modificador & GLUT_ACTIVE_CTRL){
                     transladarObjetos(-tPasso, 0);
                     std::cout << "CTRL + Seta esquerda pressionada, transladando objetos" << std::endl;
                     glutPostRedisplay();
-                }else if(modificador == GLUT_ACTIVE_SHIFT){
+                }else if(modificador & GLUT_ACTIVE_SHIFT){
                     rotacionarObjetos(rPasso, true, true, true);
                     std::cout << "SHIFT + Seta esquerda pressionada, rotacionando objetos 5 graus para a esquerda" << std::endl;
                     glutPostRedisplay();
-                }else if(modificador == GLUT_ACTIVE_ALT){
+                }else if(modificador & GLUT_ACTIVE_ALT){
                     refletirObjetos(true, false);
                     std::cout << "ALT + Seta esquerda pressionada, refletindo objetos horizontalmente" << std::endl;
                     glutPostRedisplay();
                 }
                 break;
             case GLUT_KEY_UP:
-                if(modificador == GLUT_ACTIVE_CTRL){
+             
+                if(modificador & GLUT_ACTIVE_CTRL){
                     transladarObjetos(0, tPasso);
                     std::cout << "CTRL + Seta para cima pressionada, transladando objetos" << std::endl;
                     glutPostRedisplay();
-                }else if(modificador == GLUT_ACTIVE_SHIFT){
+                }else if(modificador & GLUT_ACTIVE_SHIFT){
                     escalarObjetos(fatorCrescimento);
                     std::cout << "SHIFT + Seta para cima pressionada, escalando objetos em 10%" << std::endl;
                     glutPostRedisplay();
-                }else if(modificador == GLUT_ACTIVE_ALT){
+                }else if(modificador & GLUT_ACTIVE_ALT){
                     refletirObjetos(false, true);
                     std::cout << "ALT + Seta para cima pressionada, refletindo objetos verticalmente" << std::endl;
                     glutPostRedisplay();
                 }
                 break;
             case GLUT_KEY_DOWN:
-                if(modificador == GLUT_ACTIVE_CTRL){
+               
+                if(modificador & GLUT_ACTIVE_CTRL){
                     transladarObjetos(0, -tPasso);
                     std::cout << "CTRL + Seta para baixo pressionada, transladando objetos" << std::endl;
                     glutPostRedisplay();
-                }else if(modificador == GLUT_ACTIVE_SHIFT){
+                }else if(modificador & GLUT_ACTIVE_SHIFT){
                     escalarObjetos(fatorEncolhimento);
                     std::cout << "SHIFT + Seta para baixo pressionada, encolhendo objetos em 10%" << std::endl;
                     glutPostRedisplay();
-                }else if(modificador == GLUT_ACTIVE_ALT){
+                }else if(modificador & GLUT_ACTIVE_ALT){
                     refletirObjetos(false, true);
                     std::cout << "ALT + Seta para baixo pressionada, refletindo objetos verticalmente" << std::endl;
                     glutPostRedisplay();
                 }
                 break;
             case GLUT_KEY_RIGHT:
-                if(modificador == GLUT_ACTIVE_CTRL){
+        
+                if(modificador & GLUT_ACTIVE_CTRL){
                     transladarObjetos(tPasso, 0);
                     std::cout << "CTRL + Seta direita pressionada, transladando objetos" << std::endl;
                     glutPostRedisplay();
-                }else if(modificador == GLUT_ACTIVE_SHIFT){
+                }else if(modificador & GLUT_ACTIVE_SHIFT){
                     rotacionarObjetos(-rPasso, true, true, true);
                     std::cout << "SHIFT + Seta direita pressionada, rotacionando objetos 5 graus para a direita" << std::endl;
                     glutPostRedisplay();
-                }else if(modificador == GLUT_ACTIVE_ALT){
+                }else if(modificador & GLUT_ACTIVE_ALT){
                     refletirObjetos(true, false);
                     std::cout << "ALT + Seta direita pressionada, refletindo objetos horizontalmente" << std::endl;
                     glutPostRedisplay();

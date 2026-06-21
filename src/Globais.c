@@ -1,5 +1,5 @@
 #include "../headers/Globais.h"
-#include "../headers/Geometria.h"
+#include "../headers/geometria.h"
 
 // definições das variáveis globais
 ModoDesenho modoAtual = SELECAO;

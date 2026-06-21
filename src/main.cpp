@@ -1,5 +1,5 @@
 #include "../headers/Globais.h"
-#include "../headers/Eventos.h"
+#include "../headers/eventos.h"
 //#include "../headers/transformacoes.h"
 #include <GL/glut.h>
 

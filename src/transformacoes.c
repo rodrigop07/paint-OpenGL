@@ -1,4 +1,4 @@
-#include "../headers/Transformacoes.h"
+#include "../headers/transformacoes.h"
 #include "../headers/Globais.h"
 #include <GL/glut.h>
 #include <cmath>
