@@ -1,12 +1,40 @@
-#include "../headers/transformacoes.h"
-#include "../headers/global.h"
-//#include "../headers/geometria.h"
+#include "../headers/Transformacoes.h"
+#include "../headers/Globais.h"
+#include <GL/glut.h>
 #include <cmath>
 #include <iostream>
 
 
 float calcularDistancia(Vertice v1, Vertice v2){
     return std::sqrt(std::pow(v2.x - v1.x, 2) + std::pow(v2.y - v1.y, 2));
+}
+
+// função que verifica se um polígono foi selecionado utilizando o algorítmo de ray casting
+bool cliqueDentroPoligono(float xClique, float yClique, const std::vector<Vertice> &vertices){
+    bool interior = false;
+    int numVertices = vertices.size();
+
+    int j = numVertices - 1;
+    for(int i = 0; i < numVertices; i++){
+        // pega as coordenadas de dois vértices consecutivos
+        float xi = vertices[i].x, yi = vertices[i].y;
+        float xj = vertices[j].x, yj = vertices[j].y;
+
+        // verifica se o eixo y do clique cruza a linha formada pelos vértices
+        // se a coordenada y do clique não estiver abaixo ou acima de ambos os vértices, significa que cruza a linha em algum ponto
+        bool tocaAresta = ((yi > yClique) != (yj > yClique));
+        if(tocaAresta){
+            // calcula a coordenada x de onde ocorreu o toque na aresta
+            float xToque = (xj - xi) * (yClique - yi) / (yj - yi) + xi;
+            // verifica se o toque ocorreu a direita do clique
+            if (xClique < xToque){
+                interior = !interior; // inverte o estado de interioridade
+            }
+        }
+        // atualiza o vértice anterior para o vértice atual
+        j = i;
+    }
+    return interior;
 }
 
 // função para tentar selecionar um objeto com o mouse
@@ -20,9 +48,11 @@ void tentarSelecionar(int x, int y){
             // inverte o estado de seleção do vértice
             if(p.selecionado){
                 p.selecionado = false;
+                objetosSelecionados--;
                 std::cout << "Ponto deselecionado em (" << x << ", " << y << ")" << std::endl;
             }else{
                 p.selecionado = true;
+                objetosSelecionados++;
                 std::cout << "Ponto selecionado em (" << x << ", " << y << ")" << std::endl;
             }
             return;
@@ -39,9 +69,11 @@ void tentarSelecionar(int x, int y){
             // inverte o estado de seleção da reta
             if(r.selecionado){
                 r.selecionado = false;
+                objetosSelecionados--;
                 std::cout << "Reta deselecionada em (" << x << ", " << y << ")" << std::endl;
             }else{
                 r.selecionado = true;
+                objetosSelecionados++;
                 std::cout << "Reta selecionada em (" << x << ", " << y << ")" << std::endl;
             }
             return;
@@ -50,26 +82,19 @@ void tentarSelecionar(int x, int y){
 
     // verifica se algum polígono foi selecionado
     for(auto &p: listaPoligonos){
-        int qtdVertices = p.vertices.size();
-        for(int i = 0; i < qtdVertices; i++){
-            // pega dois vértices consecutivos do polígono
-            Vertice v1 = p.vertices[i];
-            Vertice v2 = p.vertices[(i + 1) % qtdVertices];
-            // verifica se o clique está próximo o suficiente da reta
-            float d1 = calcularDistancia(v1, cliqueMouse);
-            float d2 = calcularDistancia(v2, cliqueMouse);
-            float tamReta = calcularDistancia(v1, v2);
-            if ((d1 + d2 - tamReta) <= tolerancia){
-                // inverte o estado de seleção do polígono
-                if(p.selecionado){
-                    p.selecionado = false;
-                    std::cout << "Poligono deselecionado em (" << x << ", " << y << ")" << std::endl;
-                }else{
-                    p.selecionado = true;
-                    std::cout << "Poligono selecionado em (" << x << ", " << y << ")" << std::endl;
-                }
-                return;
-            }   
+        // chama a função que verifica se o clique ocorreu no interior do polígono
+        if(cliqueDentroPoligono(cliqueMouse.x, cliqueMouse.y, p.vertices)){
+            // inverte o estado de seleção do polígono
+            if(p.selecionado){
+                p.selecionado = false;
+                objetosSelecionados--;
+                std::cout << "Poligono deselecionado em (" << x << ", " << y << ")" << std::endl;
+            }else{
+                p.selecionado = true;
+                objetosSelecionados++;
+                std::cout << "Poligono selecionado em (" << x << ", " << y << ")" << std::endl;
+            }
+            return;
         }
     }
 }
@@ -108,7 +133,7 @@ void excluirObjetos(){
 }
 
 // função para rotacionar objetos
-void rotacionarObjetos(float anguloG){
+void rotacionarObjetos(float anguloG, bool pontos, bool retas, bool poligonos){
     // converte o ângulo de graus para radianos
     float anguloR = anguloG * (3.14159265f / 180.0f);
     // calcula seno e cosseno do ângulo
@@ -116,56 +141,62 @@ void rotacionarObjetos(float anguloG){
     float senA = std::sin(anguloR);
 
     // aplica a rotação dos pontos em torno da origem
-    for(auto &p: listaPontos){
-        if(p.selecionado){
-            float xAnterior = p.v.x;
-            float yAnterior = p.v.y;
-            // aplica a fórmula de rotação
-            p.v.x = xAnterior * cosA - yAnterior * senA;
-            p.v.y = xAnterior * senA + yAnterior * cosA;
+    if(pontos){
+        for(auto &p: listaPontos){
+            if(p.selecionado){
+                float xAnterior = p.v.x;
+                float yAnterior = p.v.y;
+                // aplica a fórmula de rotação
+                p.v.x = xAnterior * cosA - yAnterior * senA;
+                p.v.y = xAnterior * senA + yAnterior * cosA;
+            }
         }
     }
 
     // aplica rotação nas retas
-    for(auto &r: listaRetas){
-        if(r.selecionado){
-            // calcula o centro da reta
-            float cx = (r.v1.x + r.v2.x) / 2.0f;
-            float cy = (r.v1.y + r.v2.y) / 2.0f;
+    if(retas){
+        for(auto &r: listaRetas){
+            if(r.selecionado){
+                // calcula o centro da reta
+                float cx = (r.v1.x + r.v2.x) / 2.0f;
+                float cy = (r.v1.y + r.v2.y) / 2.0f;
 
-            // aplica translação + rotação + translação inversa no vértice 1
-            float x1 = r.v1.x;
-            float y1 = r.v1.y;
-            r.v1.x = (x1 - cx) * cosA - (y1 - cy) * senA + cx;
-            r.v1.y = (x1 - cx) * senA + (y1 - cy) * cosA + cy;
+                // aplica translação + rotação + translação inversa no vértice 1
+                float x1 = r.v1.x;
+                float y1 = r.v1.y;
+                r.v1.x = (x1 - cx) * cosA - (y1 - cy) * senA + cx;
+                r.v1.y = (x1 - cx) * senA + (y1 - cy) * cosA + cy;
             
-            // aplica translação + rotação + translação inversa no vértice 2
-            float x2 = r.v2.x;
-            float y2 = r.v2.y;
-            r.v2.x = (x2 - cx) * cosA - (y2 - cy) * senA + cx;
-            r.v2.y = (x2 - cx) * senA + (y2 - cy) * cosA + cy;
+                // aplica translação + rotação + translação inversa no vértice 2
+                float x2 = r.v2.x;
+                float y2 = r.v2.y;
+                r.v2.x = (x2 - cx) * cosA - (y2 - cy) * senA + cx;
+                r.v2.y = (x2 - cx) * senA + (y2 - cy) * cosA + cy;
+            }
         }
     }
 
     // aplica rotação nos polígonos
-    for(auto &p: listaPoligonos){
-        if(p.selecionado && !p.vertices.empty()){
-            // calcula o centro do polígono
-            float cx = 0, cy = 0;
-            for(const auto &v: p.vertices){
-                cx += v.x;
-                cy += v.y;
-            }
+    if(poligonos){
+        for(auto &p: listaPoligonos){
+            if(p.selecionado && !p.vertices.empty()){
+                // calcula o centro do polígono
+                float cx = 0, cy = 0;
+                for(const auto &v: p.vertices){
+                    cx += v.x;
+                    cy += v.y;
+                }
             
-            cx /= p.vertices.size();
-            cy /= p.vertices.size();
+                cx /= p.vertices.size();
+                cy /= p.vertices.size();
 
-            // aplica translação + rotação + translação inversa em cada vértice do polígono
-            for(auto &v: p.vertices){
-                float xAnterior = v.x;
-                float yAnterior = v.y;
-                v.x = (xAnterior - cx) * cosA - (yAnterior - cy) * senA + cx;
-                v.y = (xAnterior - cx) * senA + (yAnterior - cy) * cosA + cy;
+                // aplica translação + rotação + translação inversa em cada vértice do polígono
+                for(auto &v: p.vertices){
+                    float xAnterior = v.x;
+                    float yAnterior = v.y;
+                    v.x = (xAnterior - cx) * cosA - (yAnterior - cy) * senA + cx;
+                    v.y = (xAnterior - cx) * senA + (yAnterior - cy) * cosA + cy;
+                }
             }
         }
     }
@@ -330,4 +361,71 @@ void cisalharObjetos(float ciX, float ciY){
             }
         }
     }
+}
+
+
+// função para gerenciar o mvimento dos objetos durante a animação
+void loopAnimacao(int id){
+    if(!animacao)
+        return;
+
+    bool bateuParedeX = false;
+    bool bateuParedeY = false;
+
+    for(auto &p: listaPontos){
+        if(p.selecionado){
+            p.v.x += velAnimacaoX;
+            p.v.y += velAnimacaoY;
+
+            if(p.v.x <= 0 || p.v.x >= larguraJanela)
+                bateuParedeX = true;
+
+            if(p.v.y <= 0 || p.v.y >= alturaJanela)
+                bateuParedeY = true;
+        }
+    }
+    
+    for(auto &r: listaRetas){
+        if(r.selecionado){
+            // translada os vértices da reta
+            r.v1.x += velAnimacaoX;
+            r.v1.y += velAnimacaoY;
+            r.v2.x += velAnimacaoX;
+            r.v2.y += velAnimacaoY;
+
+            // verifica os limites da tela
+            if(r.v1.x <= 0 || r.v1.x >= larguraJanela || r.v2.x <= 0 || r.v2.x >= larguraJanela)
+                bateuParedeX = true;
+            
+            if(r.v1.y <= 0 || r.v1.y >= alturaJanela || r.v2.y <= 0 || r.v2.y >= alturaJanela)
+                bateuParedeY = true;
+        }
+    }
+
+    for(auto &p: listaPoligonos){
+        if(p.selecionado && !p.vertices.empty()){
+            for(auto &v: p.vertices){
+                v.x += velAnimacaoX;
+                v.y += velAnimacaoY;
+
+                if(v.x <= 0 || v.x >= larguraJanela)
+                    bateuParedeX = true;
+
+                if(v.y <= 0 || v.y >= alturaJanela)
+                    bateuParedeY = true;
+            }
+        }
+    }
+
+    rotacionarObjetos(-0.2f, false, true, true);
+    // inverte a velocidade se bater na parede
+    if(bateuParedeX){
+        velAnimacaoX *= -1;
+    }
+    if(bateuParedeY){ 
+        velAnimacaoY *= -1;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(16, loopAnimacao, 0);
 }

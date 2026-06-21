@@ -1,7 +1,7 @@
-#include "../headers/eventos.h"
-#include "../headers/global.h"
-#include "../headers/geometria.h"
-#include "../headers/transformacoes.h"
+#include "../headers/Eventos.h"
+#include "../headers/Globais.h"
+#include "../headers/Geometria.h"
+#include "../headers/Transformacoes.h"
 #include <GL/glut.h>
 #include <iostream>
 #include <cmath>
@@ -126,7 +126,7 @@ void display(){
     // percorre a lista de polígonos
     for(const auto &p: listaPoligonos){
         // inicia modo de renderização de polígonos
-        glBegin(GL_LINE_LOOP);
+        glBegin(GL_POLYGON);
         // desenha cada vértice do polígono
         for(const auto &v: p.vertices){
             glVertex2f(v.x, v.y);
@@ -246,6 +246,14 @@ void handleKeyboard(unsigned char key, int x, int y){
         }else if(key == 15){
             abrirArquivo();
             std::cout << "Ctrl + o pressionado, abrindo arquivo" << std::endl;
+        }else if(key == 1){
+            animacao = !animacao;
+            if(animacao && objetosSelecionados > 0){
+                std::cout << "Animacao iniciada" << std::endl;
+                glutTimerFunc(16, loopAnimacao, 0);
+            }else if(!animacao && objetosSelecionados > 0){
+                std::cout << "Animacao parada" << std::endl;
+            }
         }
     }else{
         // usa as teclas para alternar entre os modos de desenho
@@ -312,7 +320,7 @@ void handleSpecialKeyboard(int key, int x, int y){
                     std::cout << "CTRL + Seta esquerda pressionada, transladando objetos" << std::endl;
                     glutPostRedisplay();
                 }else if(modificador == GLUT_ACTIVE_SHIFT){
-                    rotacionarObjetos(rPasso);
+                    rotacionarObjetos(rPasso, true, true, true);
                     std::cout << "SHIFT + Seta esquerda pressionada, rotacionando objetos 5 graus para a esquerda" << std::endl;
                     glutPostRedisplay();
                 }else if(modificador == GLUT_ACTIVE_ALT){
@@ -357,7 +365,7 @@ void handleSpecialKeyboard(int key, int x, int y){
                     std::cout << "CTRL + Seta direita pressionada, transladando objetos" << std::endl;
                     glutPostRedisplay();
                 }else if(modificador == GLUT_ACTIVE_SHIFT){
-                    rotacionarObjetos(-rPasso);
+                    rotacionarObjetos(-rPasso, true, true, true);
                     std::cout << "SHIFT + Seta direita pressionada, rotacionando objetos 5 graus para a direita" << std::endl;
                     glutPostRedisplay();
                 }else if(modificador == GLUT_ACTIVE_ALT){

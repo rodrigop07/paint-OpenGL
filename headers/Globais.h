@@ -1,7 +1,7 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include "geometria.h"
+#include "Geometria.h"
 #include <vector>
 
 // variáveis globais
@@ -19,5 +19,10 @@ extern int arrastoY;
 extern int pontosReta;
 extern Vertice cacheV1;
 extern std::vector<Vertice> verticesPoligono;
+
+extern int objetosSelecionados;
+extern bool animacao;
+extern float velAnimacaoX;
+extern float velAnimacaoY;
 
 #endif // GLOBAL_H

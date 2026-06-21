@@ -1,5 +1,5 @@
-#include "../headers/global.h"
-#include "../headers/eventos.h"
+#include "../headers/Globais.h"
+#include "../headers/Eventos.h"
 //#include "../headers/transformacoes.h"
 #include <GL/glut.h>
 
@@ -13,7 +13,7 @@ void init(int argc, char** argv, int largura, int altura){
     //posição inicial da janela
     glutInitWindowPosition(100, 100);
     // título da janela
-    glutCreateWindow("Paint 2.0");
+    glutCreateWindow("Paint (ou quase isso) em C++ com OpenGL");
 
     // inicia modo de matriz de projeção
     glMatrixMode(GL_PROJECTION);

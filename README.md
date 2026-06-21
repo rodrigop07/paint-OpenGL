@@ -33,5 +33,6 @@ Aperte `Shift` + `a` para cisalhar objetos selecionados na direção x negativam
 Aperte `Shift` + `s` para cisalhar objetos selecionados na direção x positivamente  
 Aperte `Shift` + `z` para cisalhar objetos selecionados na direção y negativamente  
 Aperte `Shift` + `x` para cisalhar objetos selecionados na direção y positivamente  
-Aperte `Ctrl` `s` para salvar o progresso  
-Aperte `Ctrl` `o` para carregar o progresso  
+Aperte `Ctrl` + `s` para salvar o progresso  
+Aperte `Ctrl` + `o` para carregar o progresso  
+Aperte `Ctrl` + `a` para iniciar ou parar a animação  
