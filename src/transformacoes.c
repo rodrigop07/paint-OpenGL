@@ -3,6 +3,7 @@
 #include <GL/glut.h>
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 
 float calcularDistancia(Vertice v1, Vertice v2){
@@ -428,4 +429,109 @@ void loopAnimacao(int id){
 
     glutPostRedisplay();
     glutTimerFunc(16, loopAnimacao, 0);
+}
+
+// fecho convexo
+
+// Retorna > 0 se anti-horário, < 0 se horário, 0 se colinear
+float orientacao(Vertice p, Vertice q, Vertice r) {
+    return (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
+}
+
+// Merge entre a metade esquerda com a direita encontrando as tangentes
+std::vector<Vertice> mergeFechos(std::vector<Vertice>& esq, std::vector<Vertice>& dir) {
+    int n1 = esq.size(), n2 = dir.size();
+    int ia = 0, ib = 0;
+    
+    // Ponto mais à direita da esquerda, e mais à esquerda da direita
+    for (int i = 1; i < n1; i++) if (esq[i].x > esq[ia].x) ia = i;
+    for (int i = 1; i < n2; i++) if (dir[i].x < dir[ib].x) ib = i;
+
+    // Encontrando a Tangente Superior
+    int inda = ia, indb = ib;
+    bool done = false;
+    while (!done) {
+        done = true;
+        while (orientacao(dir[indb], esq[inda], esq[(inda + 1) % n1]) >= 0)
+            inda = (inda + 1) % n1;
+        while (orientacao(esq[inda], dir[indb], dir[(n2 + indb - 1) % n2]) <= 0) {
+            indb = (n2 + indb - 1) % n2;
+            done = false;
+        }
+    }
+    int upper_a = inda, upper_b = indb;
+
+    // Encontrando a Tangente Inferior
+    inda = ia, indb = ib;
+    done = false;
+    while (!done) {
+        done = true;
+        while (orientacao(esq[inda], dir[indb], dir[(indb + 1) % n2]) >= 0)
+            indb = (indb + 1) % n2;
+        while (orientacao(dir[indb], esq[inda], esq[(n1 + inda - 1) % n1]) <= 0) {
+            inda = (n1 + inda - 1) % n1;
+            done = false;
+        }
+    }
+    int lower_a = inda, lower_b = indb;
+
+    // Costurando o novo polígono convexo final
+    std::vector<Vertice> ret;
+    int ind = upper_a;
+    ret.push_back(esq[upper_a]);
+    while (ind != lower_a) {
+        ind = (ind + 1) % n1;
+        ret.push_back(esq[ind]);
+    }
+    ind = lower_b;
+    ret.push_back(dir[lower_b]);
+    while (ind != upper_b) {
+        ind = (ind + 1) % n2;
+        ret.push_back(dir[ind]);
+    }
+    return ret;
+}
+
+// Quebra recursiva
+std::vector<Vertice> divideEConquista(std::vector<Vertice>& pontos) {
+    // Caso base: 3 pontos ou menos, apenas ajusta para anti-horário
+    if (pontos.size() <= 3) {
+        if (pontos.size() == 3 && orientacao(pontos[0], pontos[1], pontos[2]) < 0) {
+            Vertice temp = pontos[1];
+            pontos[1] = pontos[2];
+            pontos[2] = temp;
+        }
+        return pontos;
+    }
+    
+    int meio = pontos.size() / 2;
+    std::vector<Vertice> esq(pontos.begin(), pontos.begin() + meio);
+    std::vector<Vertice> dir(pontos.begin() + meio, pontos.end());
+
+    std::vector<Vertice> fechoEsq = divideEConquista(esq);
+    std::vector<Vertice> fechoDir = divideEConquista(dir);
+
+    return mergeFechos(fechoEsq, fechoDir);
+}
+
+// Função principal de entrada
+std::vector<Vertice> fechoConvexoDivConq(std::vector<Vertice> pontos) {
+    if (pontos.size() < 3) return pontos;
+
+    // O algoritmo exige ordenação prévia pelo eixo X
+    std::sort(pontos.begin(), pontos.end(), [](const Vertice& a, const Vertice& b) {
+        if (a.x == b.x) return a.y < b.y;
+        return a.x < b.x;
+    });
+
+    return divideEConquista(pontos);
+}
+
+// Aplica a transformação nos polígonos que estão selecionados na tela
+void aplicarFechoConvexoSelecionados() {
+    for(auto &p: listaPoligonos){
+        if(p.selecionado && p.vertices.size() >= 3){
+            p.vertices = fechoConvexoDivConq(p.vertices);
+        }
+    }
 }
