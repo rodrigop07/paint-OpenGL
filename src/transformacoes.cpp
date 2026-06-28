@@ -447,14 +447,19 @@ std::vector<Vertice> mergeFechos(std::vector<Vertice>& esq, std::vector<Vertice>
     for (int i = 1; i < n1; i++) if (esq[i].x > esq[ia].x) ia = i;
     for (int i = 1; i < n2; i++) if (dir[i].x < dir[ib].x) ib = i;
 
+    // bug encontrado aqui, as condições <= 0 e >= 0 foram invertidas
     // Encontrando a Tangente Superior
     int inda = ia, indb = ib;
     bool done = false;
     while (!done) {
         done = true;
-        while (orientacao(dir[indb], esq[inda], esq[(inda + 1) % n1]) >= 0)
+        // Invertido para <= 0
+        while (orientacao(dir[indb], esq[inda], esq[(inda + 1) % n1]) <= 0) {
             inda = (inda + 1) % n1;
-        while (orientacao(esq[inda], dir[indb], dir[(n2 + indb - 1) % n2]) <= 0) {
+            done = false;
+        }
+        // Invertido para >= 0
+        while (orientacao(esq[inda], dir[indb], dir[(n2 + indb - 1) % n2]) >= 0) {
             indb = (n2 + indb - 1) % n2;
             done = false;
         }
@@ -466,9 +471,13 @@ std::vector<Vertice> mergeFechos(std::vector<Vertice>& esq, std::vector<Vertice>
     done = false;
     while (!done) {
         done = true;
-        while (orientacao(esq[inda], dir[indb], dir[(indb + 1) % n2]) >= 0)
+        // Invertido para <= 0 
+        while (orientacao(esq[inda], dir[indb], dir[(indb + 1) % n2]) <= 0) {
             indb = (indb + 1) % n2;
-        while (orientacao(dir[indb], esq[inda], esq[(n1 + inda - 1) % n1]) <= 0) {
+            done = false;
+        }
+        // Invertido para >= 0
+        while (orientacao(dir[indb], esq[inda], esq[(n1 + inda - 1) % n1]) >= 0) {
             inda = (n1 + inda - 1) % n1;
             done = false;
         }
