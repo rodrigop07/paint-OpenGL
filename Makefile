@@ -4,7 +4,7 @@ CXXFLAGS = -O3 -Wall -std=c++17
 TARGET = app
 
 # 2. Listagem de arquivos de código
-SRCS = src/main.cpp src/eventos.cpp src/Globais.c src/transformacoes.c
+SRCS = src/main.cpp src/eventos.cpp src/Globais.cpp src/transformacoes.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # 3. DETECÇÃO AUTOMÁTICA DE SISTEMA OPERACIONAL
@@ -13,13 +13,16 @@ ifeq ($(OS), Windows_NT)
     # Windows (Usando MinGW / MSYS2)
     LIBS = -lfreeglut -lglu32 -lopengl32 -lgdi32
     RM = del /Q /F
-    TARGET := $(TARGET).exe
+    CLEAN_OBJS = $(subst /,\,$(OBJS))
+    RUN_CMD = $(TARGET)
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S), Linux)
         # Linux (Ubuntu, Debian, Fedora, etc.)
         LIBS = -lGLEW -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lglut -lGLU
         RM = rm -rf
+        CLEAN_OBJS = $(OBJS)
+        RUN_CMD = ./$(TARGET)
     endif
     ifeq ($(UNAME_S), Darwin)
         # macOS (Usando Homebrew para glfw/glew)
@@ -27,6 +30,8 @@ else
         CXXFLAGS += -I/opt/homebrew/include
         LIBS = -L/opt/homebrew/lib -lGLEW -lglfw -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
         RM = rm -rf
+        CLEAN_OBJS = $(OBJS)
+        RUN_CMD = ./$(TARGET)
     endif
 endif
 
@@ -43,6 +48,10 @@ $(TARGET): $(OBJS)
 
 # Limpeza dos arquivos gerados
 clean:
-	$(RM) $(OBJS) $(TARGET)
+	$(RM) $(CLEAN_OBJS) $(TARGET).exe
 
-.PHONY: all clean
+# executa o programa
+run:
+	$(RUN_CMD)
+
+.PHONY: all clean run
