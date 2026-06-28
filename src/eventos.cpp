@@ -129,7 +129,7 @@ void display(){
     // percorre a lista de polígonos
     for(const auto &p: listaPoligonos){
         // inicia modo de renderização de polígonos
-        glBegin(GL_POLYGON);
+        glBegin(GL_LINE_LOOP);
         // desenha cada vértice do polígono
         for(const auto &v: p.vertices){
             glVertex2f(v.x, v.y);
@@ -222,6 +222,12 @@ void handleKeyboard(unsigned char key, int x, int y){
     // exclui os objetos selecionados se estiver no modo seleção
     if(modoAtual == SELECAO && (key == 'd' || key == 'D')){
         excluirObjetos();
+        glutPostRedisplay();
+    }
+
+    if(modoAtual == SELECAO && (key == 'c' || key == 'C')){
+        aplicarFechoConvexoSelecionados();
+        std::cout << "Fecho convexo aplicado aos poligonos selecionados!" << std::endl;
         glutPostRedisplay();
     }
 

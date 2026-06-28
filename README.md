@@ -16,9 +16,12 @@ Com este editor, o usuário pode interagir diretamente com a tela para criar pon
     *   **Pontos**: Adicione pontos com precisão na tela.
     *   **Retas**: Conecte dois pontos para formar segmentos de reta.
     *   **Polígonos**: Crie formas complexas com qualquer quantidade de vértices.
-*   **Seleção de Objetos**:
+*   **Seleção de Objetos (Algoritmo do Tiro)**:
     *   Clique diretamente nas formas para selecioná-las (pontos, retas e polígonos).
-    *   Seleção de polígonos robusta baseada no algoritmo clássico de **Ray Casting** (clique interno).
+    *   Seleção de polígonos robusta baseada no algoritmo de **Ray Casting (Algoritmo do Tiro)**, permitindo selecionar com precisão até mesmo polígonos côncavos complexos.
+*   **Fecho Convexo (Dividir e Conquistar)**:
+    *   Transformação automática de polígonos côncavos em polígonos convexos.
+    *   Implementação eficiente baseada no paradigma de **Divisão e Conquista** ($O(N \log N)$), realizando o particionamento dos vértices, cálculo de orientação por produto vetorial e união através de tangentes superiores e inferiores.
 *   **Transformações Geométricas**:
     *   **Translação**: Mova os objetos selecionados livremente nas direções X e Y.
     *   **Rotação**: Gire as formas em torno de seus respectivos baricentros.
@@ -66,6 +69,7 @@ O aplicativo é operado por meio de atalhos rápidos do teclado e cliques do mou
 | `Alt` + `↑` ou `↓` | **Reflexão Horizontal** | Espelha os objetos selecionados em relação ao eixo horizontal (inversão vertical). |
 | `Shift` + `a` / `s` | **Cisalhamento X** | Aplica distorção cisalhante no eixo X (negativo / positivo). |
 | `Shift` + `z` / `x` | **Cisalhamento Y** | Aplica distorção cisalhante no eixo Y (negativo / positivo). |
+| `c` | **Fecho Convexo** | Aplica o algoritmo de Divisão e Conquista para transformar o polígono côncavo selecionado em convexo. |
 
 ### Sistema e Animação
 
@@ -143,7 +147,13 @@ app.exe
 3.  **Salvar e Abrir:**
     *   Ao desenhar diversas formas, pressione `Ctrl` + `s`. O arquivo `progresso.txt` será criado na raiz do projeto contendo os dados matemáticos de todas as formas na tela.
     *   Feche o editor, abra-o novamente e aperte `Ctrl` + `o` para restaurar o estado salvo.
-
+4.  **Transformando um Polígono Côncavo em Convexo:**
+    *   Pressione a tecla `p` (Modo Polígono).
+    *   Desenhe uma forma côncava na tela (como uma estrela, uma letra "C" ou um "Pac-Man") dando vários cliques com o **botão esquerdo**, e finalize com o **botão direito**.
+    *   Pressione a tecla `s` para ativar a seleção.
+    *   Clique dentro da forma côncava para selecioná-la (o algoritmo do tiro validará o clique).
+    *   Pressione a tecla `c` no teclado. A forma automaticamente esticará suas extremidades, ligando as tangentes e se convertendo em um polígono perfeitamente convexo!
+    
 ---
 
 ## 📂 Estrutura do Código
