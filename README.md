@@ -195,8 +195,8 @@ paint-OpenGL/
 * **Jonathas Levi Pascoal Palmeira** - 2024.1 
 * **Fabrício Elízio Lima dos Santos** - 2024.1
 * **Otávio da Silva Ferreira** - 2024.1
-* **Rodrigo Pinheiro Alcantra** - 2024.1
-* **Rafael da Silva Souza** - 2024.1
+* **Rodrigo Pinheiro Alcântara** - 2024.1
+* **Rafael da Silva Sousa** - 2024.1
 
 ---
 
