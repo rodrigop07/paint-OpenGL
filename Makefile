@@ -1,13 +1,12 @@
-# 1. Configurações do Compilador e Flags básicas
+# Configurações do Compilador e Flags básicas
 CXX = g++
 CXXFLAGS = -O3 -Wall -std=c++17
 TARGET = app
 
-# 2. Listagem de arquivos de código
-SRCS = src/main.cpp src/eventos.cpp src/Globais.cpp src/transformacoes.cpp
+# Listagem de arquivos de código
+SRCS = src/main.cpp src/Eventos.cpp src/Globais.cpp src/Transformacoes.cpp
 OBJS = $(SRCS:.cpp=.o)
 
-# 3. DETECÇÃO AUTOMÁTICA DE SISTEMA OPERACIONAL
 # Define as flags de renderização e janelas baseado no OS atual
 ifeq ($(OS), Windows_NT)
     # Windows (Usando MinGW / MSYS2)
@@ -15,6 +14,7 @@ ifeq ($(OS), Windows_NT)
     RM = del /Q /F
     CLEAN_OBJS = $(subst /,\,$(OBJS))
     RUN_CMD = $(TARGET)
+    EXT = .exe
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S), Linux)
@@ -23,6 +23,7 @@ else
         RM = rm -rf
         CLEAN_OBJS = $(OBJS)
         RUN_CMD = ./$(TARGET)
+        EXT = 
     endif
     ifeq ($(UNAME_S), Darwin)
         # macOS (Usando Homebrew para glfw/glew)
@@ -35,7 +36,7 @@ else
     endif
 endif
 
-# 4. Regras de Compilação
+# Regras de Compilação
 all: $(TARGET)
 
 # Linkagem do executável final
@@ -48,7 +49,7 @@ $(TARGET): $(OBJS)
 
 # Limpeza dos arquivos gerados
 clean:
-	$(RM) $(CLEAN_OBJS) $(TARGET).exe
+	$(RM) $(CLEAN_OBJS) $(TARGET)$(EXT)
 
 # executa o programa
 run:

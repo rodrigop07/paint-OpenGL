@@ -1,12 +1,25 @@
-#include "../headers/eventos.h"
+#include "../headers/Eventos.h"
 #include "../headers/Globais.h"
-#include "../headers/geometria.h"
-#include "../headers/transformacoes.h"
+#include "../headers/Geometria.h"
+#include "../headers/Transformacoes.h"
 #include <GL/glut.h>
+#include <vector>
 #include <iostream>
 #include <cmath>
 #include <fstream>
 
+
+// limpa o vértice usado para criar a reta caso a reta não seja criada
+void limparVerticeReta(){
+    pontosReta = 0;
+    glutPostRedisplay();
+}
+
+// limpa os vértices usados para criar o polígono caso o polígono não seja criado
+void limparVerticesPoligono(){
+    verticesPoligono.clear();
+    glutPostRedisplay();
+}
 
 // função para salvar a cena em um arquivo
 void salvarArquivo(){
@@ -107,12 +120,31 @@ void abrirArquivo(){
 void display(){
     // limpa o buffer de cor da tela
     glClear(GL_COLOR_BUFFER_BIT);
+    // define o tamanho do ponto
+    glPointSize(3.0f);
 
     // inicia modo de renderização de pontos únicos
     glBegin(GL_POINTS);
     // percorre a lista de pontos e desenha cada um
     for(const auto &p: listaPontos){
+        if(p.selecionado){
+            glColor3f(1.0f, 0.0f, 0.0f); // vermelho
+        }else{
+            glColor3f(0.0f, 0.0f, 0.0f); // preto
+        }
         glVertex2f(p.v.x, p.v.y);
+    }
+    // desenha o primeiro vértice da reta caso ele exista
+    if(pontosReta == 1){
+        glColor3f(0.0f, 0.0f, 1.0f); // azul, para indicar que a reta ainda não foi criada
+        glVertex2f(cacheV1.x, cacheV1.y);
+    }
+    // desenha os vértices do polígono em criação
+    if(verticesPoligono.size() > 0){
+        glColor3f(0.0f, 0.0f, 1.0f); // azul, para indicar que o polígono ainda não foi criado
+        for(const auto &v: verticesPoligono){
+            glVertex2f(v.x, v.y);
+        }
     }
     // encerra o modo de renderização
     glEnd();
@@ -121,6 +153,11 @@ void display(){
     glBegin(GL_LINES);
     // desenha cada reta da lista
     for(const auto &r: listaRetas){
+        if(r.selecionado){
+            glColor3f(1.0f, 0.0f, 0.0f); // vermelho
+        }else{
+            glColor3f(0.0f, 0.0f, 0.0f); // preto
+        }
         glVertex2f(r.v1.x, r.v1.y);
         glVertex2f(r.v2.x, r.v2.y);
     }
@@ -128,8 +165,18 @@ void display(){
 
     // percorre a lista de polígonos
     for(const auto &p: listaPoligonos){
-        // inicia modo de renderização de polígonos
-        glBegin(GL_LINE_LOOP);
+        if(p.selecionado){
+            glColor3f(1.0f, 0.0f, 0.0f); // vermelho
+        }else{
+            glColor3f(0.0f, 0.0f, 0.0f); // preto
+        }
+
+        // se o polígono for convexo, desenha ele preenchido
+        if(p.convexo){
+            glBegin(GL_POLYGON);
+        }else{ // se não, desenha somente as linhas
+            glBegin(GL_LINE_LOOP);
+        }
         // desenha cada vértice do polígono
         for(const auto &v: p.vertices){
             glVertex2f(v.x, v.y);
@@ -173,6 +220,8 @@ void handleMouse(int button, int state, int x, int y){
                 // atualiza a variável para aguardar o próximo clique do mouse
                 pontosReta = 1;
                 std::cout << "Primeiro vertice da reta definido em (" << x << ", " << yCorrigido << ")" << std::endl;
+                // redesenha a tela com o primeiro vértice definido da reta
+                glutPostRedisplay();
             }else if(pontosReta == 1){
                 // segundo vértice da reta, cria e adiciona a lista
                 Reta novaReta;
@@ -208,7 +257,7 @@ void handleMouse(int button, int state, int x, int y){
             // adiciona o polígono à lista de polígonos
             listaPoligonos.push_back(novoPoligono);
             // limpa a lista de vértices temporária
-            verticesPoligono.clear();
+            limparVerticesPoligono();
             std::cout << "Poligono criado" << std::endl;
             glutPostRedisplay();
         }
@@ -273,18 +322,26 @@ void handleKeyboard(unsigned char key, int x, int y){
         // usa as teclas para alternar entre os modos de desenho
         // troca para o modo ponto
         if(key == 'v' || key == 'V'){
+            limparVerticeReta();
+            limparVerticesPoligono();
             modoAtual = PONTO;
             std::cout << "Modo PONTO ativado" << std::endl;
         // troca para o modo reta
         }else if(key == 'r' || key == 'R'){
+            limparVerticeReta();
+            limparVerticesPoligono();
             modoAtual = RETA;
             std::cout << "Modo RETA ativado" << std::endl;
         // troca para o modo polígono
         }else if(key == 'p' || key == 'P'){
+            limparVerticeReta();
+            limparVerticesPoligono();
             modoAtual = POLIGONO;
             std::cout << "Modo POLIGONO ativado" << std::endl;
         // troca para o modo seleção
         }else if(key == 's' || key == 'S'){
+            limparVerticeReta();
+            limparVerticesPoligono();
             modoAtual = SELECAO;
             std::cout << "Modo SELECAO ativado" << std::endl;
         }

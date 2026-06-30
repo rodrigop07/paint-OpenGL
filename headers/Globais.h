@@ -1,7 +1,7 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include "geometria.h"
+#include "Geometria.h"
 #include <vector>
 
 // variáveis globais

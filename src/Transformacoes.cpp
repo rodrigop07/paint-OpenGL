@@ -1,4 +1,4 @@
-#include "../headers/transformacoes.h"
+#include "../headers/Transformacoes.h"
 #include "../headers/Globais.h"
 #include <GL/glut.h>
 #include <cmath>
@@ -541,6 +541,8 @@ void aplicarFechoConvexoSelecionados() {
     for(auto &p: listaPoligonos){
         if(p.selecionado && p.vertices.size() >= 3){
             p.vertices = fechoConvexoDivConq(p.vertices);
+            p.convexo = true;
         }
     }
+    std::cout << "Fecho convexo aplicado em todos os poligonos selecionados" << std::endl;
 }

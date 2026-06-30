@@ -1,7 +1,7 @@
 #ifndef TRANSFORMACOES_H
 #define TRANSFORMACOES_H
 
-#include "geometria.h"
+#include "Geometria.h"
 #include <vector>
 
 float calcularDistancia(Vertice v1, Vertice v2);

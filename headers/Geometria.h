@@ -25,6 +25,7 @@ struct Reta{
 struct Poligono{
     std::vector<Vertice> vertices;
     bool selecionado = false;
+    bool convexo = false;
 };
 
 enum ModoDesenho{

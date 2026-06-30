@@ -1,6 +1,6 @@
 #include "../headers/Globais.h"
-#include "../headers/eventos.h"
-//#include "../headers/transformacoes.h"
+#include "../headers/Eventos.h"
+#include "../headers/Transformacoes.h"
 #include <GL/glut.h>
 
 void init(int argc, char** argv, int largura, int altura){
@@ -10,10 +10,12 @@ void init(int argc, char** argv, int largura, int altura){
 
     // tamanho da janela
     glutInitWindowSize(largura, altura);
-    //posição inicial da janela
+    // posição inicial da janela
     glutInitWindowPosition(100, 100);
     // título da janela
     glutCreateWindow("Paint (ou quase isso) em C++ com OpenGL");
+    // define a cor de fundo da tela para branco
+    glClearColor(0.94f, 0.94f, 0.94f, 1.0f);
 
     // inicia modo de matriz de projeção
     glMatrixMode(GL_PROJECTION);
