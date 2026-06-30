@@ -121,7 +121,7 @@ void display(){
     // limpa o buffer de cor da tela
     glClear(GL_COLOR_BUFFER_BIT);
     // define o tamanho do ponto
-    glPointSize(3.0f);
+    glPointSize(2.0f);
 
     // inicia modo de renderização de pontos únicos
     glBegin(GL_POINTS);
@@ -160,6 +160,15 @@ void display(){
         }
         glVertex2f(r.v1.x, r.v1.y);
         glVertex2f(r.v2.x, r.v2.y);
+    }
+
+    // desenha as arestas do polígono em criação de forma incremental
+    if(verticesPoligono.size() > 1){
+        glColor3f(0.0f, 0.0f, 1.0f); // azul, para indicar que o polígono ainda não foi criado
+        for(int i = 0; i < (int)verticesPoligono.size() - 1; i++){
+            glVertex2f(verticesPoligono[i].x, verticesPoligono[i].y);
+            glVertex2f(verticesPoligono[i + 1].x, verticesPoligono[i + 1].y);
+        }
     }
     glEnd();
 
@@ -250,6 +259,10 @@ void handleMouse(int button, int state, int x, int y){
     }else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN){
         // fecha o polígono e adiciona na lista de polígonos
         if(modoAtual == POLIGONO){
+            if(verticesPoligono.size() < 3){
+                std::cout << "Poligono invalido" << std::endl;
+                return;
+            }
             Poligono novoPoligono;
             novoPoligono.selecionado = false;
             // recebe a lista de vértices temporária
